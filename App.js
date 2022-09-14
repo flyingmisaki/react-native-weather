@@ -1,25 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { useState, useCallback } from 'react';
+import { StatusBar } from 'expo-status-bar'
+import { useState, useCallback } from 'react'
 import { StyleSheet, View, Text, TextInput, ImageBackground, ActivityIndicator} from 'react-native';
-import axios, * as others from 'axios';
+import {api, fetchFromApi} from './api'
 
 export default function App() {
 	const [input, setInput] = useState("");
 	const [loading, setLoading] = useState(false)
 	const [data, setData] =	useState([])
 
-	const api = {
-		key: 'b8f097e453d7667ecdfaa15bbcb8ded3',
-		baseUrl: 'http://api.openweathermap.org/data/2.5'
-	}
-
-	const fetchDataHandler = useCallback(() => {
+	const fetchWeatherData = useCallback(() => {
 		console.log('fired')
 		setInput("")
-		axios({
-			method: "GET",
-			url: `https://api.openweathermap.org/data/2.5/weather?q=${input}&units=metric&appid=${api.key}`
-		})
+
+		fetchFromApi("/weather", {q : input, units: "metric"})
 			.then(res => {
 				console.log(res.data)
 				setData(res.data)
@@ -31,35 +24,28 @@ export default function App() {
 	const render = function() {
 		return (
 			<View style = {styles.root}>
-				<StatusBar style = {styles.statusBar}/>
+				<StatusBar style = 'light'/>
 				<ImageBackground
 					source = {require('./assets/background.jpg')}
 					resizeMode = "cover"
 					style = {styles.backgroundImage}
 				>
-					<View>
-						<TextInput
-							placeholder = 'Enter a city or location name...'
-							placeholderTextColor = '#000000'
-							onChangeText = {text => setInput(text)}
-							value = {input}
-							style = {styles.textInput}
-							onSubmitEditing = {fetchDataHandler}
-						/>
-					</View>
-					{loading && (
-						<View>
-							<ActivityIndicator size = {'large'} color = '#000000'/>
-						</View>
-					)}
-					{data && (
+					<Text style = {styles.titleText}>Weather?</Text>
+					<TextInput
+						placeholder = 'Enter a city or location name...'
+						placeholderTextColor = 'rba(0, 0, 0, 0.8)'
+						onChangeText = {text => setInput(text)}
+						value = {input}
+						style = {styles.textInput}
+						onSubmitEditing = {fetchWeatherData}
+					/>
+					{loading && (<View><ActivityIndicator size = {'large'} color = 'rgba('/></View>)}
+					{data.length != 0 && (
 						<View style = {styles.infoView}>
-							<Text style = {styles.locationText}>
-								{`${data?.name}, ${data?.sys?.country}`}
-							</Text>
-							<Text style = {styles.dateText}>{new Date().toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</Text>
+							<Text style = {styles.locationText}>{`${data?.name}, ${data?.sys?.country}`}</Text>
+							<Text style = {commonStyles.displayText}>{new Date().toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</Text>
 							<Text style = {styles.temperatureText}>{`${Math.round(data?.main?.temp)} °C`}</Text>
-							<Text style = {styles.minMaxTemperatureText}>{`Min: ${Math.round(data?.main?.temp_min)} °C / Max: ${Math.round(data?.main?.temp_max)} °C`}</Text>
+							<Text style = {commonStyles.displayText}>{`Min: ${Math.round(data?.main?.temp_min)} °C / Max: ${Math.round(data?.main?.temp_max)} °C`}</Text>
 						</View>
 					)}
 				</ImageBackground>
@@ -70,50 +56,52 @@ export default function App() {
 	return render()
 }
 
-const styles = StyleSheet.create({
-	statusBar: {
-		color: '#ffffff'
+const commonStyles = StyleSheet.create({
+	displayText: {
+		color: 'rgba(255, 255, 255, 0.8)',
+		fontSize: 25,
+		marginVertical: 5
 	},
+})
+
+const styles = StyleSheet.create({
 	root: {
 		flex: 1,
 	},
 	backgroundImage: {
-		flex: 1,
-		flexDirection: 'column'
+		position: 'absolute',
+		width: '100%',
+		height: '100%'
+	},
+	titleText: {
+		...commonStyles.displayText,
+		textAlign: 'center',
+		fontSize: 48,
+		marginTop: "20%"
 	},
 	textInput: {
 		borderBottomWidth: 3,
+		color: 'rgba(0, 0, 0, 0.8)',
 		padding: 5,
-		paddingVertical: 20,
-		marginVertical: 100,
-		marginHorizontal: 10,
-		backgroundColor: '#ffffff',
-		fontSize: 19,
-		borderRadius: 16,
-		borderBottomColor: '#00ffff'
+		paddingLeft: 10,
+		paddingVertical: 15,
+		marginVertical: 50,
+		marginHorizontal: 15,
+		backgroundColor: 'rgba(255, 255, 255, 0.8)',
+		fontSize: 20,
+		borderBottomColor: 'rgba(0, 255, 255, 0.6)'
 	},
 	infoView: {
 		alignItems: 'center'
 	},
 	locationText: {
-		color: '#ffffff',
-		fontSize: 40,
-		fontWeight: 'bold'
-	},
-	dateText: {
-		color: '#ffffff',
-		fontSize: 22,
-		marginVertical: 10
+		...commonStyles.displayText,
+		fontSize: 48,
+		fontWeight: 'bold',
+		marginVertical: 0
 	},
 	temperatureText: {
-		fontSize: 45,
-		color: '#ffffff',
-		marginVertical: 10
+		...commonStyles.displayText,
+		fontSize: 55,
 	},
-	minMaxTemperatureText: {
-		fontSize: 22,
-		color: '#ffffff',
-		marginVertical: 10,
-		fontWeight: '500'
-	}
 })
