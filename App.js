@@ -58,7 +58,7 @@ export default function App() {
 
 const commonStyles = StyleSheet.create({
 	displayText: {
-		color: 'rgba(255, 255, 255, 0.8)',
+		color: 'rgba(255, 255, 255, 0.75)',
 		fontSize: 25,
 		marginVertical: 5
 	},
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
 	},
 	textInput: {
 		borderBottomWidth: 3,
-		color: 'rgba(0, 0, 0, 0.8)',
+		color: 'rgba(0, 0, 0, 0.4)',
 		padding: 5,
 		paddingLeft: 10,
 		paddingVertical: 15,
